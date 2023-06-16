@@ -1,8 +1,8 @@
 import * as esbuild from 'esbuild'
 
 await esbuild.build({
-  entryPoints: ['src/init_app.js', 'src/redirect_app.js'],
-  outdir: 'build',
+  entryPoints: ['src/init.ts', 'src/redirect.ts'],
+  outdir: 'lti',
   bundle: true,
   assetNames: '[name]-[hash].digested',
   logLevel: 'info',

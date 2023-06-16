@@ -3,11 +3,11 @@ import { doLtiRedirect } from "./redirect";
 
 const settings = {
   'state': 'state',
-  'require_csrf': true,
-  'lti_storage_params': {
+  'requireCsrf': true,
+  'ltiStorageParams': {
     'target': '_parent',
-    'origin_support_broken': true,
-    'oidc_url': 'https://canvas.instructure.com/api/lti/authorize_redirect',
+    'originSupportBroken': true,
+    'oidcUrl': 'https://canvas.instructure.com/api/lti/authorize_redirect',
   },
 };
 
@@ -18,7 +18,7 @@ describe('test', () => {
       <form action="https://assessments.atomicjolt.xyz/lti_launches/" method="POST">
           <input type="hidden" name="state" id="state" value="state" />
           <input type="hidden" name="id_token" id="id_token" value="id_token" />
-          <input type="hidden" name="csrf_token" id="csrf_token" value="" />
+          <input type="hidden" name="csrfToken" id="csrfToken" value="" />
       </form>
       <div id="error" class="hidden">error</div>
     `;
@@ -40,7 +40,7 @@ describe('test', () => {
   it('submits form when cookie is not present and lti storage isn\'t available', () => {
     const mockSubmit = vi.fn()
     document.forms[0].submit = mockSubmit;
-    doLtiRedirect({ ...settings, lti_storage_params: null });
+    doLtiRedirect({ ...settings, ltiStorageParams: null });
     expect(mockSubmit).toHaveBeenCalled();
   });
 

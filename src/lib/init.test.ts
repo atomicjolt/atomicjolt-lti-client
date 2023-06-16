@@ -2,21 +2,23 @@ import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import i18next from "i18next";
 import { doLtiStorageLaunch, tryRequestStorageAccess, launchNewWindow } from "./init"
 
+import { InitSettings } from "../types";
+
 i18next
   .init({
     fallbackLng: 'en',
     keySeparator: false,
   });
 
-const settings = {
+const settings: InitSettings = {
   'state': 'state',
-  'csrf_token': 'csrf',
+  'csrfToken': 'csrf',
   'response_url': 'https://canvas.instructure.com/api/lti/authorize_redirect?client_id=43460000000000539',
-  'relaunch_init_url': 'https://test.atomicjolt.xyz/oidc/init?iss=https%3A%2F%2Fcanvas.instructure.com',
-  'lti_storage_params': {
+  'relaunchInitUrl': 'https://test.atomicjolt.xyz/oidc/init?iss=https%3A%2F%2Fcanvas.instructure.com',
+  'ltiStorageParams': {
     'target': '_parent',
-    'origin_support_broken': true,
-    'oidc_url': 'https://canvas.instructure.com/api/lti/authorize_redirect',
+    'originSupportBroken': true,
+    'oidcUrl': 'https://canvas.instructure.com/api/lti/authorize_redirect',
   },
 };
 
@@ -42,7 +44,7 @@ describe('test', () => {
     const openSpy = vi.spyOn(window, 'open');
     openSpy.mockImplementation(() => {});
     launchNewWindow(settings);
-    expect(openSpy).toHaveBeenCalledWith(settings.relaunch_init_url);
+    expect(openSpy).toHaveBeenCalledWith(settings.relaunchInitUrl);
     expect(document.getElementById('button_launch_new_window').disabled).toBe(true);
     expect(document.body.innerHTML).toContain("Please click");
     expect(document.body.innerHTML).not.toContain("enable cookies");
@@ -57,14 +59,14 @@ describe('test', () => {
   });
 
   it('shows cookie error when in top frame', async () => {
-    await doLtiStorageLaunch({ ...settings, lti_storage_params: null });
+    await doLtiStorageLaunch({ ...settings, ltiStorageParams: null });
     expect(document.body.innerHTML).toContain("check your browser");
     expect(document.body.innerHTML).not.toContain("Open in a new window");
   });
 
   it('shows launch in new window when not in top frame', async () => {
     vi.spyOn(window, 'top', 'get').mockReturnValue({});
-    await doLtiStorageLaunch({ ...settings, lti_storage_params: null });
+    await doLtiStorageLaunch({ ...settings, ltiStorageParams: null });
     expect(document.body.innerHTML).toContain("Open in a new window");
   });
 
@@ -72,7 +74,7 @@ describe('test', () => {
     document.hasStorageAccess = () => Promise.resolve(false);
     document.requestStorageAccess = () => Promise.resolve(false);
     vi.spyOn(window, 'top', 'get').mockReturnValue({});
-    await doLtiStorageLaunch({ ...settings, lti_storage_params: null });
+    await doLtiStorageLaunch({ ...settings, ltiStorageParams: null });
     await new Promise(process.nextTick);
     expect(document.body.innerHTML).toContain("enable cookies");
   });
@@ -81,7 +83,7 @@ describe('test', () => {
     document.hasStorageAccess = () => Promise.reject();
     document.requestStorageAccess = () => Promise.resolve(true);
     vi.spyOn(window, 'top', 'get').mockReturnValue({});
-    await doLtiStorageLaunch({ ...settings, lti_storage_params: null });
+    await doLtiStorageLaunch({ ...settings, ltiStorageParams: null });
     await new Promise(process.nextTick);
     expect(document.body.innerHTML).not.toContain("enable cookies");
   });
@@ -90,7 +92,7 @@ describe('test', () => {
     document.hasStorageAccess = () => Promise.resolve(true);
     document.requestStorageAccess = () => Promise.resolve(true);
     vi.spyOn(window, 'top', 'get').mockReturnValue({});
-    await doLtiStorageLaunch({ ...settings, lti_storage_params: null });
+    await doLtiStorageLaunch({ ...settings, ltiStorageParams: null });
     await new Promise(process.nextTick);
     expect(document.body.innerHTML).not.toContain("enable cookies");
   });

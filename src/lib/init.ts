@@ -1,7 +1,13 @@
 import i18next from "i18next";
 
+import { InitSettings } from '../types'
+
+
 function showError() {
   const container = document.getElementById('main-content');
+  if (!container) {
+    throw 'Could not find main-content element';
+  }
   container.innerHTML = `
     <div class="u-flex aj-centered-message">
       <i class="material-icons-outlined aj-icon" aria-hidden="true">warning</i>
@@ -12,14 +18,17 @@ function showError() {
   `;
 }
 
-function privacyHtml(settings) {
-  return i18next.t(settings.privacy_policy_message || `We use cookies for login and security.`) + ' '
+function privacyHtml(settings: InitSettings) {
+  return i18next.t(settings.privacyPolicyMessage || `We use cookies for login and security.`) + ' '
     + i18next.t(`Learn more in our <a href='{{url}}' target='_blank'>privacy policy</a>.`);
 }
 
-function showLaunchNewWindow(settings, options) {
+function showLaunchNewWindow(settings: InitSettings, options: { disableLaunch: boolean, showRequestStorageAccess: boolean, showStorageAccessDenied: boolean }) {
   const { disableLaunch, showRequestStorageAccess, showStorageAccessDenied } = options;
   const container = document.getElementById('main-content');
+  if (!container) {
+    throw 'Could not find main-content element';
+  }
   container.innerHTML = `
     <div class="aj-centered-message">
       <h1 class="aj-title">
@@ -52,15 +61,22 @@ function showLaunchNewWindow(settings, options) {
       `:''}
     </div>
   `;
-  document.getElementById("button_launch_new_window").onclick = () => launchNewWindow(window.SETTINGS);
+
+  document.getElementById("button_launch_new_window")!.onclick = () => launchNewWindow(settings);
+  
   if (showRequestStorageAccess) {
-    document.getElementById("request_storage_access_link").
-      onclick = () => tryRequestStorageAccess(window.SETTINGS);
+    document.getElementById("request_storage_access_link")!.
+      onclick = () => tryRequestStorageAccess(settings);
   }
 }
 
-function showCookieError(settings) {
+function showCookieError(settings: InitSettings) {
   const container = document.getElementById('main-content');
+  
+  if (!container) {
+    throw 'Could not find main-content element';
+  }
+  
   container.innerHTML = `
     <div id="cookie_error" class="aj-centered-message">
       <h1 class="aj-title">
@@ -77,19 +93,19 @@ function showCookieError(settings) {
   `;
 }
 
-export function launchNewWindow(settings) {
-  window.open(settings.relaunch_init_url);
-  showLaunchNewWindow(settings, { disableLaunch: true });
+export function launchNewWindow(settings: InitSettings) {
+  window.open(settings.relaunchInitUrl);
+  showLaunchNewWindow(settings, { disableLaunch: true, showRequestStorageAccess: false, showStorageAccessDenied: false });
 }
 
-function storeCsrf(state, csrf_token, storage_params) {
-  return new Promise((resolve, reject) => {
-    let platformOrigin = new URL(storage_params.oidc_url).origin;
+function storeCsrf(state: any, csrfToken: any, storage_params: any) {
+  return new Promise<void>((resolve, reject) => {
+    let platformOrigin = new URL(storage_params.oidcUrl).origin;
     let frameName = storage_params.target;
     let parent = window.parent || window.opener;
     let targetFrame = frameName === "_parent" ? parent : parent.frames[frameName];
 
-    if (storage_params.origin_support_broken) {
+    if (storage_params.originSupportBroken) {
       // The spec requires that the message's target origin be set to the platform's OIDC Authorization url
       // but Canvas does not yet support this, so we have to use '*'.
       platformOrigin = '*'
@@ -100,7 +116,7 @@ function storeCsrf(state, csrf_token, storage_params) {
       reject(new Error('Timeout while waiting for platform response'));
     }, 2000);
 
-    let receiveMessage = (event) => {
+    let receiveMessage = (event: any) => {
         if (typeof event.data === "object" &&
             event.data.subject === "lti.put_data.response" &&
             event.data.message_id === state &&
@@ -120,11 +136,11 @@ function storeCsrf(state, csrf_token, storage_params) {
     };
 
     window.addEventListener('message', receiveMessage);
-    targetFrame.postMessage({
+    targetFrame?.postMessage({
             "subject": "lti.put_data",
             "message_id": state,
             "key": "atomic_lti_" + state,
-            "value": csrf_token
+            "value": csrfToken
           } , platformOrigin );
 
     // Platform should post a message back
@@ -132,7 +148,7 @@ function storeCsrf(state, csrf_token, storage_params) {
   });
 }
 
-export function tryRequestStorageAccess(settings) {
+export function tryRequestStorageAccess(settings: InitSettings) {
   document.requestStorageAccess()
     .then(() => {
       // We should have cookies now
@@ -141,7 +157,7 @@ export function tryRequestStorageAccess(settings) {
     })
     .catch((e) => {
       console.log(e);
-      showLaunchNewWindow(settings, { showStorageAccessDenied: true });
+      showLaunchNewWindow(settings, { showStorageAccessDenied: true, disableLaunch: true, showRequestStorageAccess: false });
     });
 }
 
@@ -153,15 +169,15 @@ async function checkForStorageAccess() {
   }
 }
 
-function hasCookie(settings) {
+function hasCookie(settings: InitSettings) {
   if (document.cookie) {
     return document.cookie.match('(^|;)\\s*open_id_' + settings.state);
   }
   return false;
 }
 
-function setCookie(settings) {
-  document.cookie = 'open_id_' + settings.state +'=' + settings.csrf_token + '; path=/; max-age=300; SameSite=None ;'
+function setCookie(settings: InitSettings) {
+  document.cookie = 'open_id_' + settings.state +'=' + settings.csrfToken + '; path=/; max-age=300; SameSite=None ;'
 }
 
 function hasStorageAccessAPI() {
@@ -169,7 +185,7 @@ function hasStorageAccessAPI() {
     && typeof document.requestStorageAccess === 'function';
 }
 
-export async function doLtiStorageLaunch(settings) {
+export async function doLtiStorageLaunch(settings: InitSettings) {
   let submitToPlatform = () => { window.location.replace(settings.response_url) };
 
   if (hasCookie(settings)) {
@@ -177,10 +193,10 @@ export async function doLtiStorageLaunch(settings) {
     return submitToPlatform();
   }
 
-  if (settings.lti_storage_params) {
+  if (settings.ltiStorageParams) {
     // We have lti postMessage storage
     try {
-      await storeCsrf(settings.state, settings.csrf_token, settings.lti_storage_params);
+      await storeCsrf(settings.state, settings.csrfToken, settings.ltiStorageParams);
       return submitToPlatform();
     } catch (e) {
       console.log(e);
@@ -201,7 +217,7 @@ export async function doLtiStorageLaunch(settings) {
         console.log(e);
       }
     }
-    showLaunchNewWindow(settings, { showRequestStorageAccess });
+    showLaunchNewWindow(settings, { showRequestStorageAccess, disableLaunch: false, showStorageAccessDenied: false });
   } else {
     showCookieError(settings);
   }

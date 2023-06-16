@@ -2,7 +2,7 @@
 // Require files directly:
 
 // Initialize the OIDC flow
-// build/init_app.js
+// import 'lti/init';
 
 // Handle checking state after redirect
-// build/redirect_app.js
+// import 'lti/redirect';
