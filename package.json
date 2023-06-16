@@ -1,0 +1,24 @@
+{
+  "name": "@atomicjolt/lti-client",
+  "version": "1.0.0",
+  "description": "Client side Javascript to handle LTI",
+  "main": "index.js",
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "test": "vitest"
+  },
+  "keywords": [
+    "LTI"
+  ],
+  "author": "Atomic Jolt",
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.17.18",
+    "jsdom": "^22.1.0",
+    "vitest": "^0.32.0"
+  },
+  "dependencies": {
+    "i18next": "^22.4.15",
+    "i18next-browser-languagedetector": "^7.0.1"
+  }
+}
