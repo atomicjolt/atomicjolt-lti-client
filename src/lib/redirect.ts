@@ -17,7 +17,7 @@ function hasCookie(settings: RedirectSettings): boolean {
 
 function loadCsrf(state: string, storage_params: LTIStorageParams): Promise<string> {
   return new Promise((resolve, reject) => {
-    let platformOrigin = new URL(storage_params.oidcUrl).origin;
+    let platformOrigin = new URL(storage_params.platformOIDCUrl).origin;
     let frameName = storage_params.target;
     let parent = window.parent || window.opener;
     let targetFrame = frameName === '_parent' ? parent : parent.frames[frameName];

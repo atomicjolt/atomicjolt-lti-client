@@ -7,7 +7,7 @@ const settings = {
   'ltiStorageParams': {
     'target': '_parent',
     'originSupportBroken': true,
-    'oidcUrl': 'https://canvas.instructure.com/api/lti/authorize_redirect',
+    'platformOIDCUrl': 'https://canvas.instructure.com/api/lti/authorize_redirect',
   },
 };
 

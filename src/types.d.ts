@@ -6,13 +6,13 @@ declare global {
 export interface LTIStorageParams  {
   target: string;
   originSupportBroken: boolean;
-  oidcUrl: string;
+  platformOIDCUrl: string;
 }
 
 export interface InitSettings {
   state: string;
   csrfToken: string;
-  response_url: string;
+  responseUrl: string;
   ltiStorageParams: LTIStorageParams;
   relaunchInitUrl: string;
   privacyPolicyUrl?: string;

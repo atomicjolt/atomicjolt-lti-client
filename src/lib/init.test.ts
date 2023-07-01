@@ -13,12 +13,12 @@ i18next
 const settings: InitSettings = {
   'state': 'state',
   'csrfToken': 'csrf',
-  'response_url': 'https://canvas.instructure.com/api/lti/authorize_redirect?client_id=43460000000000539',
+  'responseUrl': 'https://canvas.instructure.com/api/lti/authorize_redirect?client_id=43460000000000539',
   'relaunchInitUrl': 'https://test.atomicjolt.xyz/oidc/init?iss=https%3A%2F%2Fcanvas.instructure.com',
   'ltiStorageParams': {
     'target': '_parent',
     'originSupportBroken': true,
-    'oidcUrl': 'https://canvas.instructure.com/api/lti/authorize_redirect',
+    'platformOIDCUrl': 'https://canvas.instructure.com/api/lti/authorize_redirect',
   },
 };
 
@@ -55,7 +55,7 @@ describe('test', () => {
     const mockReplace = vi.fn();
     vi.spyOn(window, 'location', 'get').mockReturnValue({ replace: mockReplace });
     await doLtiStorageLaunch(settings);
-    expect(mockReplace).toHaveBeenCalledWith(settings.response_url);
+    expect(mockReplace).toHaveBeenCalledWith(settings.responseUrl);
   });
 
   it('shows cookie error when in top frame', async () => {
@@ -104,7 +104,7 @@ describe('test', () => {
     const cookieSet = vi.spyOn(document, 'cookie', 'set');
     tryRequestStorageAccess(settings);
     await new Promise(process.nextTick);
-    expect(mockReplace).toHaveBeenCalledWith(settings.response_url);
+    expect(mockReplace).toHaveBeenCalledWith(settings.responseUrl);
     expect(cookieSet).toHaveBeenCalledWith('open_id_state=csrf; path=/; max-age=300; SameSite=None ;');
   });
 

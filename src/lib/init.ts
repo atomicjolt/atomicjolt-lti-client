@@ -100,7 +100,7 @@ export function launchNewWindow(settings: InitSettings) {
 
 function storeCsrf(state: any, csrfToken: any, storage_params: any) {
   return new Promise<void>((resolve, reject) => {
-    let platformOrigin = new URL(storage_params.oidcUrl).origin;
+    let platformOrigin = new URL(storage_params.platformOIDCUrl).origin;
     let frameName = storage_params.target;
     let parent = window.parent || window.opener;
     let targetFrame = frameName === "_parent" ? parent : parent.frames[frameName];
@@ -153,7 +153,7 @@ export function tryRequestStorageAccess(settings: InitSettings) {
     .then(() => {
       // We should have cookies now
       setCookie(settings);
-      window.location.replace(settings.response_url);
+      window.location.replace(settings.responseUrl);
     })
     .catch((e) => {
       console.log(e);
@@ -186,7 +186,7 @@ function hasStorageAccessAPI() {
 }
 
 export async function doLtiStorageLaunch(settings: InitSettings) {
-  let submitToPlatform = () => { window.location.replace(settings.response_url) };
+  let submitToPlatform = () => { window.location.replace(settings.responseUrl) };
 
   if (hasCookie(settings)) {
     // We have cookies
