@@ -63,7 +63,7 @@ function showLaunchNewWindow(settings: InitSettings, options: { disableLaunch: b
   `;
 
   document.getElementById("button_launch_new_window")!.onclick = () => launchNewWindow(settings);
-  
+
   if (showRequestStorageAccess) {
     document.getElementById("request_storage_access_link")!.
       onclick = () => tryRequestStorageAccess(settings);
@@ -72,11 +72,11 @@ function showLaunchNewWindow(settings: InitSettings, options: { disableLaunch: b
 
 function showCookieError(settings: InitSettings) {
   const container = document.getElementById('main-content');
-  
+
   if (!container) {
     throw 'Could not find main-content element';
   }
-  
+
   container.innerHTML = `
     <div id="cookie_error" class="aj-centered-message">
       <h1 class="aj-title">

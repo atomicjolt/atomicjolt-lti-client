@@ -27,9 +27,9 @@ export function InitOIDCLaunch(settings: InitSettings) {
     isLaunched = true;
   });
 
-  setTimeout(() => { 
+  setTimeout(() => {
     if (!isLaunched) {
-      document.getElementById('error')?.classList?.remove('hidden'); 
+      document.getElementById('error')?.classList?.remove('hidden');
     }
   }, 5000);
 }
