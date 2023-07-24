@@ -1,9 +1,10 @@
+import { IdToken } from './libs/lti_definitions';
 declare global {
   interface Window {
   }
 }
 
-export interface LTIStorageParams  {
+export interface LTIStorageParams {
   target: string;
   originSupportBroken: boolean;
   platformOIDCUrl: string;
@@ -11,17 +12,21 @@ export interface LTIStorageParams  {
 
 export interface InitSettings {
   state: string;
-  csrfToken: string;
   responseUrl: string;
   ltiStorageParams: LTIStorageParams;
   relaunchInitUrl: string;
+  openIdCookiePrefix: string;
   privacyPolicyUrl?: string;
   privacyPolicyMessage?: string;
 }
 
 export interface RedirectSettings {
-  requireCsrf: boolean;
-  state: string;
-  ltiStorageParams: LTIStorageParams,
+  ltiStorageParams: LTIStorageParams;
 }
 
+export interface LaunchSettings {
+  stateVerified: boolean;
+  idToken: IdToken;
+  state: string;
+  ltiStorageParams: LTIStorageParams;
+}

@@ -1,36 +1,23 @@
-import { RedirectSettings, LTIStorageParams } from '../types';
+import i18next from "i18next";
+import { STATE_KEY_PREFIX } from './constants';
+import { LaunchSettings, LTIStorageParams } from '../types';
 
-function submitForm(): void {
-  document?.forms[0]?.submit();
-}
-
-function showError(): void {
-  const error = document.getElementById('error');
-  if (error) {
-    error.classList.remove('hidden');
-  }
-}
-
-function hasCookie(settings: RedirectSettings): boolean {
-  return !!document.cookie.match(`(^|;)\\s*open_id_${settings.state}`);
-}
-
-function loadCsrf(state: string, storage_params: LTIStorageParams): Promise<string> {
+export function loadState(state: string, storageParams: LTIStorageParams): Promise<string> {
   return new Promise((resolve, reject) => {
-    let platformOrigin = new URL(storage_params.platformOIDCUrl).origin;
-    let frameName = storage_params.target as string;
+    let platformOrigin = new URL(storageParams.platformOIDCUrl).origin;
+    let frameName = storageParams.target as string;
     let parent = window.parent || window.opener;
     let targetFrame = frameName === '_parent' ? parent : parent.frames[frameName];
 
-    if (storage_params.originSupportBroken) {
+    if (storageParams.originSupportBroken) {
       // The spec requires that the message's target origin be set to the platform's OIDC Authorization url
       // but Canvas does not yet support this, so we have to use '*'.
       platformOrigin = '*';
     }
 
     const timeout = setTimeout(() => {
-      console.log('postMessage timeout');
-      reject(new Error('Timeout while waiting for platform response'));
+      console.log(i18next.t('postMessage timeout'));
+      reject(new Error(i18next.t('Timeout while waiting for platform response')));
     }, 2000);
 
     const receiveMessage = (event: MessageEvent) => {
@@ -45,44 +32,39 @@ function loadCsrf(state: string, storage_params: LTIStorageParams): Promise<stri
 
         if (event.data.error) {
           // handle errors
-          console.log(event.data.error.code);
-          console.log(event.data.error.message);
+          console.error(event.data.error.code);
+          console.error(event.data.error.message);
           reject(new Error(event.data.errormessage));
         }
         resolve(event.data.value);
       }
     };
     window.addEventListener('message', receiveMessage);
-
     targetFrame.postMessage(
       {
         subject: 'lti.get_data',
         message_id: state,
-        key: `atomic_lti_${state}`,
+        key: `${STATE_KEY_PREFIX}${state}`,
       },
       platformOrigin,
     );
-
     // Platform will post a message back
   });
 }
 
-export async function doLtiRedirect(settings: RedirectSettings): Promise<void> {
-  if (hasCookie(settings) || !settings.requireCsrf) {
-    return submitForm();
-  }
-
+export async function validateLaunch(settings: LaunchSettings): Promise<boolean> {
   if (settings.ltiStorageParams) {
     // We have lti postMessage storage
     try {
-      const csrfToken = await loadCsrf(settings.state, settings.ltiStorageParams);
-      const csrfInput = document.getElementsByName('csrfToken')[0] as HTMLInputElement;
-      csrfInput.value = csrfToken;
-      return submitForm();
+      const state = await loadState(settings.state, settings.ltiStorageParams);
+      if(state == settings.state) {
+        return true;
+      }
+      return false;
     } catch (e) {
       console.log(e);
-      showError();
+      return false;
     }
   }
-  submitForm();
+  return false;
 }

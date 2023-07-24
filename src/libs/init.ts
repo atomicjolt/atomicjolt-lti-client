@@ -1,22 +1,6 @@
 import i18next from "i18next";
-
-import { InitSettings } from '../types'
-
-
-function showError() {
-  const container = document.getElementById('main-content');
-  if (!container) {
-    throw 'Could not find main-content element';
-  }
-  container.innerHTML = `
-    <div class="u-flex aj-centered-message">
-      <i class="material-icons-outlined aj-icon" aria-hidden="true">warning</i>
-      <p class="aj-text translate">
-        ${ i18next.t("There was an error launching the LTI tool. Please reload and try again.") }
-      </p>
-    </div>
-  `;
-}
+import { STATE_KEY_PREFIX } from './constants';
+import { InitSettings, LTIStorageParams } from '../types';
 
 function privacyHtml(settings: InitSettings) {
   return i18next.t(settings.privacyPolicyMessage || `We use cookies for login and security.`) + ' '
@@ -27,7 +11,7 @@ function showLaunchNewWindow(settings: InitSettings, options: { disableLaunch: b
   const { disableLaunch, showRequestStorageAccess, showStorageAccessDenied } = options;
   const container = document.getElementById('main-content');
   if (!container) {
-    throw 'Could not find main-content element';
+    throw i18next.t('Could not find main-content element');
   }
   container.innerHTML = `
     <div class="aj-centered-message">
@@ -74,7 +58,7 @@ function showCookieError(settings: InitSettings) {
   const container = document.getElementById('main-content');
 
   if (!container) {
-    throw 'Could not find main-content element';
+    throw i18next.t('Could not find main-content element');
   }
 
   container.innerHTML = `
@@ -98,53 +82,53 @@ export function launchNewWindow(settings: InitSettings) {
   showLaunchNewWindow(settings, { disableLaunch: true, showRequestStorageAccess: false, showStorageAccessDenied: false });
 }
 
-function storeCsrf(state: any, csrfToken: any, storage_params: any) {
+function storeState(state: string, storageParams: LTIStorageParams): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    let platformOrigin = new URL(storage_params.platformOIDCUrl).origin;
-    let frameName = storage_params.target;
+    let platformOrigin = new URL(storageParams.platformOIDCUrl).origin;
+    let frameName = storageParams.target;
     let parent = window.parent || window.opener;
     let targetFrame = frameName === "_parent" ? parent : parent.frames[frameName];
 
-    if (storage_params.originSupportBroken) {
+    if (storageParams.originSupportBroken) {
       // The spec requires that the message's target origin be set to the platform's OIDC Authorization url
       // but Canvas does not yet support this, so we have to use '*'.
-      platformOrigin = '*'
+      platformOrigin = '*';
     }
 
     let timeout = setTimeout(() => {
-      console.log("postMessage timeout");
-      reject(new Error('Timeout while waiting for platform response'));
+      console.error("postMessage timeout");
+      reject(new Error(i18next.t('Timeout while waiting for platform response')));
     }, 2000);
 
     let receiveMessage = (event: any) => {
-        if (typeof event.data === "object" &&
-            event.data.subject === "lti.put_data.response" &&
-            event.data.message_id === state &&
-            (event.origin === platformOrigin || platformOrigin === "*")) {
+      if (typeof event.data === "object" &&
+          event.data.subject === "lti.put_data.response" &&
+          event.data.message_id === state &&
+          (event.origin === platformOrigin ||
+            (storageParams.originSupportBroken && platformOrigin === "*"))) {
 
-          removeEventListener('message', receiveMessage);
-          clearTimeout(timeout);
+        removeEventListener('message', receiveMessage);
+        clearTimeout(timeout);
 
-          if (event.data.error) {
-              // handle errors
-              console.log(event.data.error.code)
-              console.log(event.data.error.message)
-              reject(new Error(event.data.errormessage));
-          }
-          resolve();
+        if (event.data.error) {
+          // handle errors
+          console.error(event.data.error.code);
+          console.error(event.data.error.message);
+          reject(new Error(event.data.errormessage));
         }
+        resolve();
+      }
     };
 
     window.addEventListener('message', receiveMessage);
     targetFrame?.postMessage({
-            "subject": "lti.put_data",
-            "message_id": state,
-            "key": "atomic_lti_" + state,
-            "value": csrfToken
-          } , platformOrigin );
+      "subject": "lti.put_data",
+      "message_id": state,
+      "key": `${STATE_KEY_PREFIX}${state}`,
+      "value": state,
+    }, platformOrigin);
 
     // Platform should post a message back
-
   });
 }
 
@@ -161,23 +145,15 @@ export function tryRequestStorageAccess(settings: InitSettings) {
     });
 }
 
-async function checkForStorageAccess() {
-  try {
-    return await document.hasStorageAccess();
-  } catch(e) {
-    return false;
-  }
-}
-
 function hasCookie(settings: InitSettings) {
   if (document.cookie) {
-    return document.cookie.match('(^|;)\\s*open_id_' + settings.state);
+    return document.cookie.match(`(^|;)\\s*${settings.openIdCookiePrefix}` + settings.state);
   }
   return false;
 }
 
 function setCookie(settings: InitSettings) {
-  document.cookie = 'open_id_' + settings.state +'=' + settings.csrfToken + '; path=/; max-age=300; SameSite=None ;'
+  document.cookie = settings.openIdCookiePrefix + settings.state +'=1; path=/; max-age=60; SameSite=None;'
 }
 
 function hasStorageAccessAPI() {
@@ -196,10 +172,10 @@ export async function doLtiStorageLaunch(settings: InitSettings) {
   if (settings.ltiStorageParams) {
     // We have lti postMessage storage
     try {
-      await storeCsrf(settings.state, settings.csrfToken, settings.ltiStorageParams);
+      await storeState(settings.state, settings.ltiStorageParams);
       return submitToPlatform();
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 

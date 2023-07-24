@@ -1,0 +1,1 @@
+export const STATE_KEY_PREFIX = 'aj_lti';

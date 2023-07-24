@@ -10,16 +10,18 @@ i18next
     keySeparator: false,
   });
 
+const openIdCookiePrefix = 'oid_';
+
 const settings: InitSettings = {
-  'state': 'state',
-  'csrfToken': 'csrf',
-  'responseUrl': 'https://canvas.instructure.com/api/lti/authorize_redirect?client_id=43460000000000539',
-  'relaunchInitUrl': 'https://test.atomicjolt.xyz/oidc/init?iss=https%3A%2F%2Fcanvas.instructure.com',
-  'ltiStorageParams': {
-    'target': '_parent',
-    'originSupportBroken': true,
-    'platformOIDCUrl': 'https://canvas.instructure.com/api/lti/authorize_redirect',
+  state: 'state',
+  responseUrl: 'https://canvas.instructure.com/api/lti/authorize_redirect?client_id=43460000000000539',
+  relaunchInitUrl: 'https://test.atomicjolt.xyz/oidc/init?iss=https%3A%2F%2Fcanvas.instructure.com',
+  ltiStorageParams: {
+    target: '_parent',
+    originSupportBroken: true,
+    platformOIDCUrl: 'https://canvas.instructure.com/api/lti/authorize_redirect',
   },
+  openIdCookiePrefix,
 };
 
 describe('test', () => {
@@ -37,7 +39,7 @@ describe('test', () => {
     vi.restoreAllMocks();
     delete document.hasStorageAccess;
     delete document.requestStorageAccess;
-    document.cookie = 'open_id_state=; path=/; max-age=-1; SameSite=None;';
+    document.cookie = `${openIdCookiePrefix}state=; path=/; max-age=-1; SameSite=None;`;
   });
 
   it('launches in new window', () => {
@@ -51,7 +53,7 @@ describe('test', () => {
   });
 
   it('submits form when we have cookies', async () => {
-    vi.spyOn(window.document, 'cookie', 'get').mockReturnValue('open_id_state=jwt');
+    vi.spyOn(window.document, 'cookie', 'get').mockReturnValue(`${openIdCookiePrefix}state=jwt`);
     const mockReplace = vi.fn();
     vi.spyOn(window, 'location', 'get').mockReturnValue({ replace: mockReplace });
     await doLtiStorageLaunch(settings);
@@ -105,11 +107,11 @@ describe('test', () => {
     tryRequestStorageAccess(settings);
     await new Promise(process.nextTick);
     expect(mockReplace).toHaveBeenCalledWith(settings.responseUrl);
-    expect(cookieSet).toHaveBeenCalledWith('open_id_state=csrf; path=/; max-age=300; SameSite=None ;');
+    expect(cookieSet).toHaveBeenCalledWith('oid_state=1; path=/; max-age=60; SameSite=None;');
   });
 
   it('shows an error if storage access is not granted', async () => {
-    const logSpy = vi.spyOn(console, 'log').mockReturnValue(null);
+    const logSpy = vi.spyOn(console, 'log').mockReturnValue();
     document.requestStorageAccess = () => new Promise(function() { throw new Error('No Access'); });
     tryRequestStorageAccess(settings);
     await new Promise(process.nextTick);

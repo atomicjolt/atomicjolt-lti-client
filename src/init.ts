@@ -1,11 +1,25 @@
 import i18next from "i18next";
 import LanguageDetector from 'i18next-browser-languagedetector';
-import { doLtiStorageLaunch } from "./lib/init";
+import { doLtiStorageLaunch } from "./libs/init";
 import es from "./locale/es.json";
 import fr from "./locale/fr.json";
 
 import { InitSettings } from "./types";
 
+function showError() {
+  const container = document.getElementById('main-content');
+  if (!container) {
+    throw 'Could not find main-content element';
+  }
+  container.innerHTML += `
+    <div class="u-flex aj-centered-message">
+      <i class="material-icons-outlined aj-icon" aria-hidden="true">warning</i>
+      <p class="aj-text translate">
+        ${i18next.t("There was an error launching the LTI tool. Please reload and try again.")}
+      </p>
+    </div>
+  `;
+}
 
 export function InitOIDCLaunch(settings: InitSettings) {
   let isLaunched = false;
@@ -29,7 +43,7 @@ export function InitOIDCLaunch(settings: InitSettings) {
 
   setTimeout(() => {
     if (!isLaunched) {
-      document.getElementById('error')?.classList?.remove('hidden');
+      showError();
     }
   }, 5000);
 }
