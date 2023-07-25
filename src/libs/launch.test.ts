@@ -1,8 +1,14 @@
 import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest';
 import * as launch from "./launch";
 import { LaunchSettings } from '../types';
+import { STATE_KEY_PREFIX } from './constants';
 
 describe('test', () => {
+  const state = 'thestate';
+  const platformOIDCUrl = 'https://canvas.instructure.com/api/lti/authorize_redirect';
+  const origin = new URL(platformOIDCUrl).origin;
+  let event: any;
+  let settings: LaunchSettings;
 
   beforeEach(() => {
     document.body.innerHTML = `
@@ -12,46 +18,71 @@ describe('test', () => {
       </form>
       <div id="error" class="hidden">error</div>
     `;
+
+    settings = {
+      state,
+      stateVerified: false,
+      idToken: '',
+      ltiStorageParams: {
+        target: '_parent',
+        originSupportBroken: true,
+        platformOIDCUrl,
+      },
+    };
+
+    event = {
+      data: {
+        subject: 'lti.get_data.response',
+        message_id: state,
+        error: null,
+        value: state,
+      },
+      origin,
+    };
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
-    document.cookie = 'open_id_state=;Max-Age=-1';
+    document.cookie = `${STATE_KEY_PREFIX}${state}=;Max-Age=-1`;
   });
-
-  // TODO figure out how to write better postMessage tests
 
   describe('validateLaunch', () => {
     it('calls postMessage', async () => {
-      const settings: LaunchSettings = {
-        state: 'state',
-        stateVerified: false,
-        idToken: '',
-        ltiStorageParams: {
-          target: '_parent',
-          originSupportBroken: true,
-          platformOIDCUrl: 'https://canvas.instructure.com/api/lti/authorize_redirect',
-        },
-      };
+      // Spy on postMessage to ensure it is called.
       const postMessageSpy = vi.spyOn(window, 'postMessage');
-      await launch.validateLaunch(settings);
+
+      // Spy on addEventListener mock the response that will be sent to receiveMessage
+      vi.spyOn(window, 'addEventListener').mockImplementation((eventName, func) => {
+        if (eventName === 'message') {
+          func(event);
+        }
+      });
+
+      await expect(launch.validateLaunch(settings)).resolves.toBeTruthy();
       await new Promise(process.nextTick);
       expect(postMessageSpy).toHaveBeenCalled();
     });
 
-    it('returns false post message times out', async () => {
-      const settings: LaunchSettings = {
-        state: 'state',
-        stateVerified: false,
-        idToken: '',
-        ltiStorageParams: {
-          target: '_parent',
-          originSupportBroken: true,
-          platformOIDCUrl: 'https://canvas.instructure.com/api/lti/authorize_redirect',
-        },
-      };
+    it('returns false if postMessage times out', async () => {
       await expect(launch.validateLaunch(settings)).resolves.toBeFalsy();
     });
+
+    it('returns false if the state is invalid', async () => {
+      // Spy on postMessage to ensure it is called.
+      const postMessageSpy = vi.spyOn(window, 'postMessage');
+
+      // Spy on addEventListener mock the response that will be sent to receiveMessage
+      vi.spyOn(window, 'addEventListener').mockImplementation((eventName, func) => {
+        if (eventName === 'message') {
+          event.data.value = 'badstate';
+          func(event);
+        }
+      });
+      await expect(launch.validateLaunch(settings)).resolves.toBeFalsy();
+      await new Promise(process.nextTick);
+      expect(postMessageSpy).toHaveBeenCalled();
+    });
+    
 
     it('should return false when there is no ltiStorageParams', async () => {
       const settings: LaunchSettings = {
