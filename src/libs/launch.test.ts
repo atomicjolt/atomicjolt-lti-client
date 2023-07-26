@@ -3,11 +3,27 @@ import * as launch from "./launch";
 import { LaunchSettings } from '../types';
 import { STATE_KEY_PREFIX } from './constants';
 
+interface EventError {
+  code: string;
+  message: string;
+}
+interface LtiPlatformStorageEvent {
+  data: {
+    subject: string;
+    message_id: string;
+    error?: EventError;
+    errormessage?: string;
+    value: string;
+  };
+  origin: string;
+}
+
+
 describe('test', () => {
   const state = 'thestate';
   const platformOIDCUrl = 'https://canvas.instructure.com/api/lti/authorize_redirect';
   const origin = new URL(platformOIDCUrl).origin;
-  let event: any;
+  let event: LtiPlatformStorageEvent;
   let settings: LaunchSettings;
 
   beforeEach(() => {
@@ -34,7 +50,6 @@ describe('test', () => {
       data: {
         subject: 'lti.get_data.response',
         message_id: state,
-        error: null,
         value: state,
       },
       origin,
