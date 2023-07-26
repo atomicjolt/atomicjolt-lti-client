@@ -53,8 +53,9 @@ describe('test', () => {
 
       // Spy on addEventListener mock the response that will be sent to receiveMessage
       vi.spyOn(window, 'addEventListener').mockImplementation((eventName, func) => {
+        const receiveMessage = func as Function;
         if (eventName === 'message') {
-          func(event);
+          receiveMessage(event);
         }
       });
 
@@ -73,16 +74,16 @@ describe('test', () => {
 
       // Spy on addEventListener mock the response that will be sent to receiveMessage
       vi.spyOn(window, 'addEventListener').mockImplementation((eventName, func) => {
+        const receiveMessage = func as Function;
         if (eventName === 'message') {
           event.data.value = 'badstate';
-          func(event);
+          receiveMessage(event);
         }
       });
       await expect(launch.validateLaunch(settings)).resolves.toBeFalsy();
       await new Promise(process.nextTick);
       expect(postMessageSpy).toHaveBeenCalled();
     });
-    
 
     it('should return false when there is no ltiStorageParams', async () => {
       const settings: LaunchSettings = {
