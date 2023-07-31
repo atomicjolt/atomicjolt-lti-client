@@ -1,7 +1,8 @@
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import i18next from "i18next";
-import { doLtiStorageLaunch, tryRequestStorageAccess, launchNewWindow } from "./init"
-
+import { tryRequestStorageAccess } from './platform_storage'
+import { ltiStorageLaunch } from "./lti_storage_launch";
+import { launchNewWindow } from '../html/launch_new_window';
 import { InitSettings } from "../types";
 
 i18next
@@ -56,19 +57,19 @@ describe('test', () => {
     vi.spyOn(window.document, 'cookie', 'get').mockReturnValue(`${openIdCookiePrefix}state=jwt`);
     const mockReplace = vi.fn();
     vi.spyOn(window, 'location', 'get').mockReturnValue({ replace: mockReplace });
-    await doLtiStorageLaunch(settings);
+    await ltiStorageLaunch(settings);
     expect(mockReplace).toHaveBeenCalledWith(settings.responseUrl);
   });
 
   it('shows cookie error when in top frame', async () => {
-    await doLtiStorageLaunch({ ...settings, ltiStorageParams: null });
+    await ltiStorageLaunch({ ...settings, ltiStorageParams: null });
     expect(document.body.innerHTML).toContain("check your browser");
     expect(document.body.innerHTML).not.toContain("Open in a new window");
   });
 
   it('shows launch in new window when not in top frame', async () => {
     vi.spyOn(window, 'top', 'get').mockReturnValue({});
-    await doLtiStorageLaunch({ ...settings, ltiStorageParams: null });
+    await ltiStorageLaunch({ ...settings, ltiStorageParams: null });
     expect(document.body.innerHTML).toContain("Open in a new window");
   });
 
@@ -76,7 +77,7 @@ describe('test', () => {
     document.hasStorageAccess = () => Promise.resolve(false);
     document.requestStorageAccess = () => Promise.resolve(false);
     vi.spyOn(window, 'top', 'get').mockReturnValue({});
-    await doLtiStorageLaunch({ ...settings, ltiStorageParams: null });
+    await ltiStorageLaunch({ ...settings, ltiStorageParams: null });
     await new Promise(process.nextTick);
     expect(document.body.innerHTML).toContain("enable cookies");
   });
@@ -85,7 +86,7 @@ describe('test', () => {
     document.hasStorageAccess = () => Promise.reject();
     document.requestStorageAccess = () => Promise.resolve(true);
     vi.spyOn(window, 'top', 'get').mockReturnValue({});
-    await doLtiStorageLaunch({ ...settings, ltiStorageParams: null });
+    await ltiStorageLaunch({ ...settings, ltiStorageParams: null });
     await new Promise(process.nextTick);
     expect(document.body.innerHTML).not.toContain("enable cookies");
   });
@@ -94,7 +95,7 @@ describe('test', () => {
     document.hasStorageAccess = () => Promise.resolve(true);
     document.requestStorageAccess = () => Promise.resolve(true);
     vi.spyOn(window, 'top', 'get').mockReturnValue({});
-    await doLtiStorageLaunch({ ...settings, ltiStorageParams: null });
+    await ltiStorageLaunch({ ...settings, ltiStorageParams: null });
     await new Promise(process.nextTick);
     expect(document.body.innerHTML).not.toContain("enable cookies");
   });
@@ -121,7 +122,7 @@ describe('test', () => {
 
   it('uses the lti storage api when available', async () => {
     const postMessageSpy = vi.spyOn(window, 'postMessage')
-    await doLtiStorageLaunch(settings);
+    await ltiStorageLaunch(settings);
     await new Promise(process.nextTick);
     expect(postMessageSpy).toHaveBeenCalled();
     // TODO: Figure out how to test the postMessage API

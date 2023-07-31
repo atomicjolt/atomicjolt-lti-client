@@ -1,8 +1,8 @@
-import * as esbuild from 'esbuild'
+import * as esbuild from 'esbuild';
 
 await esbuild.build({
-  entryPoints: ['src/init.ts', 'src/launch.ts'],
-  outdir: 'lti',
+  entryPoints: ['src/client/init.ts', 'src/client/launch.ts'],
+  outdir: 'libs',
   bundle: true,
   assetNames: '[name]-[hash].digested',
   logLevel: 'info',
@@ -12,4 +12,4 @@ await esbuild.build({
   loader: {
     '.js': 'jsx'
   }
-})
+});

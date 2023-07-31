@@ -1,13 +1,13 @@
 import i18next from "i18next";
 import LanguageDetector from 'i18next-browser-languagedetector';
-import { doLtiStorageLaunch } from "./libs/init";
-import es from "./locale/es.json";
-import fr from "./locale/fr.json";
-
-import { InitSettings } from "./types";
+import { ltiStorageLaunch } from "../libs/lti_storage_launch";
+import es from "../locale/es.json";
+import fr from "../locale/fr.json";
+import { MAIN_CONTENT_ID } from "../libs/constants";
+import { InitSettings } from "../types";
 
 function showError() {
-  const container = document.getElementById('main-content');
+  const container = document.getElementById(MAIN_CONTENT_ID);
   if (!container) {
     throw 'Could not find main-content element';
   }
@@ -37,7 +37,7 @@ export function InitOIDCLaunch(settings: InitSettings) {
   i18next.changeLanguage();
 
   window.addEventListener("load", () => {
-    doLtiStorageLaunch(settings);
+    ltiStorageLaunch(settings);
     isLaunched = true;
   });
 

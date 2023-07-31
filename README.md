@@ -1,5 +1,5 @@
-# Project Title
-This is a collection of Javascript used by Atomic Jolt to assist in handling an LTI launch.
+# AtomicJolt LTI Client
+This is a collection of Javascript used by Atomic Jolt to assist in handling a LTI launch.
 
 ## Installation
 

@@ -1,11 +1,11 @@
 {
   "name": "@atomicjolt/lti-client",
   "version": "2.0.0",
-  "description": "Client side Javascript to handle LTI",
+  "description": "Client Javascript libraries to handle LTI.",
   "main": "index.js",
   "scripts": {
     "build": "node esbuild.mjs",
-    "test": "vitest"
+    "test": "npx vitest"
   },
   "keywords": [
     "LTI"
