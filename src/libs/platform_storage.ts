@@ -9,7 +9,7 @@ export async function storeState(state: string, storageParams: LTIStorageParams)
     let platformOrigin = new URL(storageParams.platformOIDCUrl).origin;
     let frameName = storageParams.target;
     let parent = window.parent || window.opener;
-    let targetFrame = frameName === "_parent" ? parent : parent.frames[frameName];
+    let targetFrame = frameName === "_parent" ? parent : parent.frames[frameName as any];
 
     if (storageParams.originSupportBroken) {
       // The spec requires that the message's target origin be set to the platform's OIDC Authorization url
