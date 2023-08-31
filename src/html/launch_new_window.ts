@@ -2,6 +2,7 @@ import i18next from "i18next";
 import { InitSettings } from '../types';
 import { privacyHtml } from './privacy';
 import { MAIN_CONTENT_ID } from '../libs/constants';
+import { tryRequestStorageAccess } from '../libs/platform_storage';
 
 export function launchNewWindow(settings: InitSettings) {
   window.open(settings.relaunchInitUrl);
