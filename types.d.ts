@@ -29,5 +29,5 @@ export interface LaunchSettings {
   stateVerified: boolean;
   idToken: IdToken;
   state: string;
-  ltiStorageParams: LTIStorageParams;
+  ltiStorageParams?: LTIStorageParams;
 }

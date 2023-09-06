@@ -1,7 +1,21 @@
 import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest';
-import { LaunchSettings } from '../types';
+import { LaunchSettings } from '../../types';
 import { STATE_KEY_PREFIX } from '../libs/constants';
 import { ltiLaunch  } from './launch';
+
+import { 
+  IdToken,
+  MESSAGE_TYPE, 
+  MessageTypes,
+  LTI_VERSION,
+  LtiVersions,
+  TARGET_LINK_URI_CLAIM,
+  RESOURCE_LINK_CLAIM,
+  DEPLOYMENT_ID,
+  ROLES_CLAIM,
+  ResourceLinkClaim,
+} from '../libs/lti_definitions';
+
 
 interface EventError {
   code: string;
@@ -18,6 +32,33 @@ interface LtiPlatformStorageEvent {
   };
   origin: string;
 }
+
+const resourceLinkClaim: ResourceLinkClaim = {
+  id: '134',
+};
+
+const idToken: IdToken = {
+  sub: '1234567890',
+  name: 'John Doe',
+  email: 'johndoe@example.com',
+  aud: '',
+  azp: '',
+  exp: 0,
+  iat: 0,
+  iss: '',
+  nonce: '12343456',
+  [MESSAGE_TYPE]: MessageTypes.LtiResourceLinkRequest,
+  [LTI_VERSION]: LtiVersions.v1_3_0,
+  [RESOURCE_LINK_CLAIM]: resourceLinkClaim,
+  [DEPLOYMENT_ID]: '',
+  [TARGET_LINK_URI_CLAIM]: '',
+  [ROLES_CLAIM]: [],
+  picture: '',
+  given_name: '',
+  family_name: '',
+  middle_name: '',
+  locale: '',
+};
 
 describe('launch', () => {
   const state = 'thestate';
@@ -36,6 +77,7 @@ describe('launch', () => {
     `;
 
     settings = {
+      idToken,
       state,
       stateVerified: false,
       ltiStorageParams: {
@@ -106,6 +148,8 @@ describe('launch', () => {
     it('should return false when there is no ltiStorageParams', async () => {
       const settings: LaunchSettings = {
         state: 'testState',
+        idToken,
+        stateVerified: false,
       };
       // Spy on addEventListener mock the response that will be sent to receiveMessage
       vi.spyOn(window, 'addEventListener').mockImplementation((eventName, func) => {
