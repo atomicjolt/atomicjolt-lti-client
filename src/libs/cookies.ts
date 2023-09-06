@@ -1,4 +1,4 @@
-import { InitSettings } from '../types';
+import { InitSettings } from '../../types';
 
 export function hasCookie(settings: InitSettings) {
   if (document.cookie) {

@@ -1,6 +1,6 @@
 import i18next from "i18next";
 import { STATE_KEY_PREFIX } from './constants';
-import { LTIStorageParams, InitSettings } from '../types';
+import { LTIStorageParams, InitSettings } from '../../types';
 import { setCookie  } from './cookies';
 import { showLaunchNewWindow } from '../html/launch_new_window';
 
@@ -77,7 +77,13 @@ export function loadState(state: string, storageParams: LTIStorageParams): Promi
     let platformOrigin = new URL(storageParams.platformOIDCUrl).origin;
     let frameName = storageParams.target as string;
     let parent = window.parent || window.opener;
-    let targetFrame = frameName === '_parent' ? parent : parent.frames[frameName];
+    let targetFrame = frameName === '_parent' ? parent : parent.frames[frameName as any];
+
+    if (!targetFrame) {
+      console.log(i18next.t('Could not find target frame'));
+      reject(new Error(i18next.t('Could not find target frame')));
+      return;
+    }
 
     if (storageParams.originSupportBroken) {
       // The spec requires that the message's target origin be set to the platform's OIDC Authorization url
