@@ -1,34 +1,23 @@
 {
 	"compilerOptions": {
-		"noEmit": true,
-		"module": "es2022",
-		"target": "es2021",
-		"lib": [
-			"ESNext",
-      "dom"
-		],
-		"outDir": "lti",
-		"removeComments": true,
-		"esModuleInterop": true,
-		"strict": true,
-		"alwaysStrict": true,
-		"preserveConstEnums": true,
-		"moduleResolution": "node",
+		"lib": ["ESNext", "dom"],
+    "module": "ESNext",
+    "target": "ESNext",
+		"outDir": "dist",
+		"declarationDir": "types",
+		"declaration": true,
+		"declarationMap": true,
 		"sourceMap": true,
-		"types": [
-			"node"
-		],
+		"strict": true,
+		"removeComments": true,
+		"moduleResolution": "Bundler",
 		"resolveJsonModule": true,
-		"allowJs": true,
-		"checkJs": false,
-		"skipLibCheck": true,
-
-		// Linter
-    "noImplicitReturns": true,
-    "noUncheckedIndexedAccess": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true
+		"checkJs": true,
+		"noEmit": false,
+    "esModuleInterop": true,
+		"alwaysStrict": true,
 	},
-	"include": ["src/**/*"],
-	"exclude": ["node_modules/**/*", "lti", "test"]
+	"files": [
+		"src/index.ts"
+	]
 }

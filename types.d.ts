@@ -1,4 +1,5 @@
-import { IdToken } from './libs/lti_definitions';
+import { IdToken } from './src/libs/lti_definitions';
+
 declare global {
   interface Window {
   }

@@ -1,5 +1,5 @@
 import i18next from "i18next";
-import { InitSettings } from '../types';
+import { InitSettings } from '../../types';
 import { privacyHtml } from "./privacy";
 import { MAIN_CONTENT_ID } from '../libs/constants';
 

@@ -4,7 +4,7 @@ import { ltiStorageLaunch } from "../libs/lti_storage_launch";
 import es from "../locale/es.json";
 import fr from "../locale/fr.json";
 import { MAIN_CONTENT_ID } from "../libs/constants";
-import { InitSettings } from "../types";
+import { InitSettings } from "../../types";
 
 function showError() {
   const container = document.getElementById(MAIN_CONTENT_ID);
@@ -21,7 +21,7 @@ function showError() {
   `;
 }
 
-export function InitOIDCLaunch(settings: InitSettings) {
+export function initOIDCLaunch(settings: InitSettings) {
   let isLaunched = false;
 
   i18next

@@ -1,4 +1,4 @@
-import { InitSettings } from '../types';
+import { InitSettings } from '../../types';
 import { hasStorageAccessAPI } from "./platform_storage";
 import { hasCookie } from "./cookies";
 import { storeState } from "./platform_storage";
