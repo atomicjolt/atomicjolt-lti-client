@@ -1,4 +1,4 @@
-import { IdToken } from './src/libs/lti_definitions';
+import { IdToken } from '@atomicjolt/lti-types';
 
 declare global {
   interface Window {

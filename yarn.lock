@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@atomicjolt/lti-types@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/@atomicjolt/lti-types/-/lti-types-1.0.0.tgz"
+  integrity sha512-nnUeO9vrR00ou8zjTnjRvoaR2HW9rmPXR+7zd2wSQqC6IE35er/VEBisdiJjYsPD8XfAksOkqJ0wfQByr0Dkxw==
+
 "@babel/runtime@^7.19.4", "@babel/runtime@^7.22.5":
   version "7.22.6"
   resolved "https://registry.npmjs.org/@babel/runtime/-/runtime-7.22.6.tgz"

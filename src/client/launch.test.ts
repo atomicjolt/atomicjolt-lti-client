@@ -14,7 +14,7 @@ import {
   DEPLOYMENT_ID,
   ROLES_CLAIM,
   ResourceLinkClaim,
-} from '../libs/lti_definitions';
+} from '@atomicjolt/lti-types';
 
 
 interface EventError {
