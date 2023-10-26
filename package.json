@@ -25,12 +25,5 @@
   "peerDependencies": {
     "i18next": "^23.5.1",
     "i18next-browser-languagedetector": "^7.1.0"
-  },
-  "files": [
-    "dist",
-    "types",
-    "README.md",
-    "types.d.ts",
-    "lti.ts"
-  ]
+  }
 }
