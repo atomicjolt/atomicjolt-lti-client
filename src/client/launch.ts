@@ -11,7 +11,7 @@ async function validateLaunch(settings: LaunchSettings): Promise<boolean> {
       }
       return false;
     } catch (e) {
-      console.log(e);
+      console.error(e);
       return false;
     }
   }
@@ -19,18 +19,9 @@ async function validateLaunch(settings: LaunchSettings): Promise<boolean> {
 }
 
 export async function ltiLaunch(settings: LaunchSettings): Promise<boolean> {
-  return new Promise<boolean>((resolve, reject) => {
-    if (!settings.stateVerified) {
-      window.addEventListener('load', async () => {
-        try {
-          const result = await validateLaunch(settings);
-          resolve(result);
-        } catch (e) {
-          reject(e);
-        }
-      });
-    } else {
-      resolve(true);
-    }
-  });
+  if (!settings.stateVerified) {
+    const result = await validateLaunch(settings);
+    return result;
+  }
+  return true;
 }
