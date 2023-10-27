@@ -11,7 +11,7 @@ async function validateLaunch(settings: LaunchSettings): Promise<boolean> {
       }
       return false;
     } catch (e) {
-      console.log(e);
+      console.error(e);
       return false;
     }
   }
