@@ -19,9 +19,6 @@ async function validateLaunch(settings: LaunchSettings): Promise<boolean> {
 }
 
 export async function ltiLaunch(settings: LaunchSettings): Promise<boolean> {
-  // if (document.readyState == 'complete') {
-
-  // }
   if (!settings.stateVerified) {
     const result = await validateLaunch(settings);
     return result;
