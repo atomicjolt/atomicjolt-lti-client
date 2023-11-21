@@ -3,7 +3,7 @@ import i18next from "i18next";
 import { tryRequestStorageAccess } from './platform_storage'
 import { ltiStorageLaunch } from "./lti_storage_launch";
 import { launchNewWindow } from '../html/launch_new_window';
-import { InitSettings } from "../types";
+import { InitSettings } from '../../types';
 
 i18next
   .init({
@@ -45,7 +45,7 @@ describe('test', () => {
 
   it('launches in new window', () => {
     const openSpy = vi.spyOn(window, 'open');
-    openSpy.mockImplementation(() => {});
+    openSpy.mockImplementation(() => { });
     launchNewWindow(settings);
     expect(openSpy).toHaveBeenCalledWith(settings.relaunchInitUrl);
     expect(document.getElementById('button_launch_new_window').disabled).toBe(true);
@@ -113,7 +113,7 @@ describe('test', () => {
 
   it('shows an error if storage access is not granted', async () => {
     const logSpy = vi.spyOn(console, 'log').mockReturnValue();
-    document.requestStorageAccess = () => new Promise(function() { throw new Error('No Access'); });
+    document.requestStorageAccess = () => new Promise(function () { throw new Error('No Access'); });
     tryRequestStorageAccess(settings);
     await new Promise(process.nextTick);
     expect(document.body.innerHTML).toContain("browser prevented");
