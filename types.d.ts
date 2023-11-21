@@ -1,4 +1,4 @@
-import { IdToken } from '@atomicjolt/lti-types';
+import { DeepLinkingClaim, IdToken } from '@atomicjolt/lti-types';
 
 declare global {
   interface Window {
@@ -27,7 +27,8 @@ export interface RedirectSettings {
 
 export interface LaunchSettings {
   stateVerified: boolean;
-  idToken: IdToken;
   state: string;
   ltiStorageParams?: LTIStorageParams;
+  jwt?: string;
+  deepLinking?: DeepLinkingClaim;
 }
