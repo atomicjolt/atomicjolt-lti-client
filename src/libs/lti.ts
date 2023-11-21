@@ -1,4 +1,4 @@
-import { 
+import {
   IdToken,
   DEEP_LINKING_CLAIM,
   LAUNCH_PRESENTATION,
@@ -7,7 +7,7 @@ import {
   NAMES_AND_ROLES_CLAIM,
   NAMES_AND_ROLES_SERVICE_VERSIONS,
   AGS_CLAIM,
- } from '@atomicjolt/lti-types';
+} from '@atomicjolt/lti-types';
 
 export function lmsHost(idToken: IdToken): string | null {
   if (isDeepLinkLaunch(idToken)) {
@@ -31,4 +31,15 @@ export function isNamesAndRolesLaunch(idToken: IdToken): boolean {
 
 export function isAssignmentAndGradesLaunch(idToken: IdToken): boolean {
   return !!idToken[AGS_CLAIM];
+}
+
+export function clientId(idToken: IdToken): string {
+  if (idToken.auds && idToken.auds.length > 1 && idToken.azp) {
+    // azp will contain the client_id if there are multiple auds
+    return idToken.azp;
+  } else if (idToken.auds && idToken.auds[0]) {
+    return idToken.auds[0];
+  } else {
+    return idToken.aud;
+  }
 }
