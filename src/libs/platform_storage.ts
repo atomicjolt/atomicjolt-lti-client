@@ -3,13 +3,24 @@ import { STATE_KEY_PREFIX } from './constants';
 import { LTIStorageParams, InitSettings } from '../../types';
 import { setCookie  } from './cookies';
 import { showLaunchNewWindow } from '../html/launch_new_window';
+import { getCapability } from "../libs/capabilities";
+
+export async function getTargetFrame(storageParams: LTIStorageParams): Promise<Window> {
+    let target = storageParams.target;
+    if (target == null) {
+      const cap = await getCapability('lti.get_data');
+      target = cap?.frame;
+    }
+    if (target == null) {
+      target = "_parent"
+    }
+    const parent = window.parent || window.opener;
+    return target === "_parent" ? parent : parent.frames[target as any] || parent;
+}
 
 export async function storeState(state: string, storageParams: LTIStorageParams): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     let platformOrigin = new URL(storageParams.platformOIDCUrl).origin;
-    let frameName = storageParams.target;
-    let parent = window.parent || window.opener;
-    let targetFrame = frameName === "_parent" ? parent : parent.frames[frameName as any];
 
     if (storageParams.originSupportBroken) {
       // The spec requires that the message's target origin be set to the platform's OIDC Authorization url
@@ -43,12 +54,20 @@ export async function storeState(state: string, storageParams: LTIStorageParams)
     };
 
     window.addEventListener('message', receiveMessage);
-    targetFrame?.postMessage({
-      "subject": "lti.put_data",
-      "message_id": state,
-      "key": `${STATE_KEY_PREFIX}${state}`,
-      "value": state,
-    }, platformOrigin);
+    getTargetFrame(storageParams)
+      .then( targetFrame =>
+         targetFrame?.postMessage({
+           "subject": "lti.put_data",
+           "message_id": state,
+           "key": `${STATE_KEY_PREFIX}${state}`,
+           "value": state,
+         }, platformOrigin)
+        ).catch( (e: unknown) => {
+          console.log(i18next.t('Could not find target frame'));
+          console.log(e);
+          reject(new Error(i18next.t('Could not find target frame')));
+          }
+        );
 
     // Platform should post a message back
   });
@@ -75,15 +94,6 @@ export function tryRequestStorageAccess(settings: InitSettings) {
 export function loadState(state: string, storageParams: LTIStorageParams): Promise<string> {
   return new Promise((resolve, reject) => {
     let platformOrigin = new URL(storageParams.platformOIDCUrl).origin;
-    let frameName = storageParams.target as string;
-    let parent = window.parent || window.opener;
-    let targetFrame = frameName === '_parent' ? parent : parent.frames[frameName as any];
-
-    if (!targetFrame) {
-      console.log(i18next.t('Could not find target frame'));
-      reject(new Error(i18next.t('Could not find target frame')));
-      return;
-    }
 
     if (storageParams.originSupportBroken) {
       // The spec requires that the message's target origin be set to the platform's OIDC Authorization url
@@ -116,14 +126,21 @@ export function loadState(state: string, storageParams: LTIStorageParams): Promi
       }
     };
     window.addEventListener('message', receiveMessage);
-    targetFrame.postMessage(
-      {
-        subject: 'lti.get_data',
-        message_id: state,
-        key: `${STATE_KEY_PREFIX}${state}`,
-      },
-      platformOrigin,
-    );
+    getTargetFrame(storageParams)
+      .then( targetFrame =>
+        targetFrame.postMessage(
+          {
+            subject: 'lti.get_data',
+            message_id: state,
+            key: `${STATE_KEY_PREFIX}${state}`,
+          },
+          platformOrigin)
+        ).catch( (e: unknown) => {
+            console.log(i18next.t('Could not find target frame'));
+            console.log(e);
+            reject(new Error(i18next.t('Could not find target frame')));
+          }
+        );
     // Platform will post a message back
   });
 }
