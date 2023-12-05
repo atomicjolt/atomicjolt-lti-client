@@ -5,6 +5,7 @@ async function validateLaunch(settings: LaunchSettings): Promise<boolean> {
   if (settings.ltiStorageParams) {
     // We have lti postMessage storage
     try {
+      console.log("Using postMessage state validation");
       const state = await loadState(settings.state, settings.ltiStorageParams);
       if (state == settings.state) {
         return true;

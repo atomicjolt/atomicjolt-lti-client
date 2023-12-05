@@ -6,8 +6,8 @@ declare global {
 }
 
 export interface LTIStorageParams {
-  target: string;
-  originSupportBroken: boolean;
+  target?: string;
+  originSupportBroken?: boolean;
   platformOIDCUrl: string;
 }
 
@@ -31,4 +31,9 @@ export interface LaunchSettings {
   ltiStorageParams?: LTIStorageParams;
   jwt?: string;
   deepLinking?: DeepLinkingClaim;
+}
+
+export interface Capability {
+  subject: string;
+  frame?: string;
 }
