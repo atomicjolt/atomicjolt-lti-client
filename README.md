@@ -1,6 +1,9 @@
 # AtomicJolt LTI Client
 This is a collection of Javascript used by Atomic Jolt to assist in handling a LTI launch.
 
+>[!IMPORTANT] 
+> This project is now maintained as part of [this repository](https://github.com/atomicjolt/atomic-libs)
+
 ## Installation
 
     `npm i @atomicjolt/lti-client`
